@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.signal import butter, filtfilt
 from multiprocessing import Value
 from pathlib import Path
 from typing import Dict, List
@@ -34,24 +33,53 @@ def read_sheet_to_dict(path: Path) -> Dict[str, List[Value]]:
             result[h].append(value)
     return result
 
+def prepare_for_plotting(data: Dict[str, list[float]]) ->Dict[str, list[float]]:
+    """
+    Prepare the data for plotting by filtering and normalizing.
+    """
+    time = np.array(data['Time'])
+    unsubtracted_heat_flow = np.array(data['Unsubtracted'])
+    baseline_heat_flow = np.array(data['Baseline'])
+
+    net_heat_flow = unsubtracted_heat_flow - baseline_heat_flow
+
+    index_first_exotherm = next(
+        i for i, v in enumerate(net_heat_flow) if v > 0)
+
+    data_out = {}
+    for key, item in data.items():
+        data_out[key] = item[index_first_exotherm:]
+
+    data_out['Net Heat Flow'] = net_heat_flow[index_first_exotherm:].tolist()
+    return data_out
+
+
 isothermal_120_path = Path(__file__).parent / "resources/isothermal_120.txt"
-isothermal_150_path = Path(__file__).parent / "resources/isothermal_150.txt"
-isothermal_180_path = Path(__file__).parent / "resources/isothermal_180.txt"
-
 data_120 = read_sheet_to_dict(isothermal_120_path)
-data_150 = read_sheet_to_dict(isothermal_120_path)
-data_180 = read_sheet_to_dict(isothermal_120_path)
+
+final_data_120 = prepare_for_plotting(data_120)
+time_120 = final_data_120['Time']
+net_heat_flow_120 = final_data_120['Net Heat Flow']
 
 
-time = data_120['Time']
-unsubtracted_heat_flow = data_120['Unsubtracted']
+isothermal_150_path = Path(__file__).parent / "resources/isothermal_150.txt"
+data_150 = read_sheet_to_dict(isothermal_150_path)
+final_data_150 = prepare_for_plotting(data_150)
+time_150 = final_data_150['Time']
+net_heat_flow_150 = final_data_150['Net Heat Flow']
 
-t = np.array(time)
-x = np.array(unsubtracted_heat_flow)
+isothermal_180_path = Path(__file__).parent / "resources/isothermal_180.txt"
+data_180 = read_sheet_to_dict(isothermal_180_path)
+final_data_180 = prepare_for_plotting(data_180)
+time_180 = final_data_180['Time']
+net_heat_flow_180 = final_data_180['Net Heat Flow']
 
-window_size = 1  # odd number; tune this
-kernel = np.ones(window_size) / window_size
-
-x_lp = np.convolve(x, kernel, mode="same")
-plt.plot(t, x, label='120°C')
+plt.plot(time_120, net_heat_flow_120, label='120°C')
+plt.plot(time_150, net_heat_flow_150, label='150°C')
+plt.plot(time_180, net_heat_flow_180, label='180°C')
+plt.axhline(y=0, color='black', linestyle='--')
+plt.axvline(x=0, color='black', linestyle='--')
+plt.xlabel('Time (s)')
+plt.ylabel('Net Heat Flow (mW)')
+plt.legend()
 plt.show()
