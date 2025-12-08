@@ -41,8 +41,19 @@ def prepare_for_plotting(data: Dict[str, list[float]]) ->Dict[str, list[float]]:
     unsubtracted_heat_flow = np.array(data['Unsubtracted'])
     baseline_heat_flow = np.array(data['Baseline'])
 
+    # Remove numerical spikes (as seen in 180 deg data)
+    for i, flow in enumerate(unsubtracted_heat_flow[:-1]):
+        if flow / unsubtracted_heat_flow[i+1] >5:
+            unsubtracted_heat_flow[i+1] = flow
+
+    # subtract baseline (which is 0 in the dataset)
     net_heat_flow = unsubtracted_heat_flow - baseline_heat_flow
 
+    # Normalize to 0 mW at the end of the measurement
+    final_heat_flow_at_end = net_heat_flow[-100:].mean()
+    net_heat_flow -= final_heat_flow_at_end
+
+    # Find the first exothermic event (net heat flow > 0):
     index_first_exotherm = next(
         i for i, v in enumerate(net_heat_flow) if v > 0)
 
@@ -74,9 +85,10 @@ final_data_180 = prepare_for_plotting(data_180)
 time_180 = final_data_180['Time']
 net_heat_flow_180 = final_data_180['Net Heat Flow']
 
-plt.plot(time_120, net_heat_flow_120, label='120°C')
-plt.plot(time_150, net_heat_flow_150, label='150°C')
+# plt.plot(time_120, net_heat_flow_120, label='120°C')
+# plt.plot(time_150, net_heat_flow_150, label='150°C')
 plt.plot(time_180, net_heat_flow_180, label='180°C')
+plt.xlim(0, 200)
 plt.axhline(y=0, color='black', linestyle='--')
 plt.axvline(x=0, color='black', linestyle='--')
 plt.xlabel('Time (s)')
