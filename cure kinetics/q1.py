@@ -57,6 +57,8 @@ def prepare_for_plotting(data: Dict[str, list[float]]) ->Dict[str, list[float]]:
     index_first_exotherm = next(
         i for i, v in enumerate(net_heat_flow) if v > 0)
 
+    # add comment
+
     data_out = {}
     for key, item in data.items():
         data_out[key] = item[index_first_exotherm:]
