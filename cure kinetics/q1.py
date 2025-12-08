@@ -49,17 +49,9 @@ unsubtracted_heat_flow = data_120['Unsubtracted']
 t = np.array(time)
 x = np.array(unsubtracted_heat_flow)
 
-# 1) sampling frequency (assumes ~uniform spacing)
-dt = t[1] - t[0]
-fs = 1.0 / dt
+window_size = 1  # odd number; tune this
+kernel = np.ones(window_size) / window_size
 
-# 2) design low-pass filter
-cutoff_hz = 0.000001   # choose this based on what you want to keep
-order = 2
-b, a = butter(order, cutoff_hz / (0.5 * fs), btype="low")
-
-# 3) apply zero-phase filter
-x_lp = filtfilt(b, a, x)
-
-plt.plot(time, x_lp, label='120°C')
+x_lp = np.convolve(x, kernel, mode="same")
+plt.plot(t, x, label='120°C')
 plt.show()
