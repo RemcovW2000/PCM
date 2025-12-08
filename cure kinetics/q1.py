@@ -75,6 +75,8 @@ def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, sta
     final_heat_flow_at_end = net_heat_flow[-100:].mean()
     net_heat_flow -= final_heat_flow_at_end
 
+    # hello
+
     # Find the first exothermic event (net heat flow > 0):
     index_first_exotherm = next(
         i for i, v in enumerate(net_heat_flow) if v > 0)
