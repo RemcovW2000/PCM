@@ -127,7 +127,7 @@ if __name__ is "__main__":
     plt.xlim(0, 200)
     plt.axhline(y=0, color='black', linestyle='--')
     plt.axvline(x=0, color='black', linestyle='--')
-    plt.xlabel('Time (s)')
+    plt.xlabel('Time (minutes)')
     plt.ylabel('Net specific heat flow rate (W/g)')
     plt.title('Net specific heat flow vs. Time')
     plt.legend()

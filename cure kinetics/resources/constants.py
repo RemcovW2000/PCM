@@ -2,6 +2,8 @@ SAMPLE_WEIGHT_180 = 14.4  # mg
 SAMPLE_WEIGHT_150 = 10.4  # mg
 SAMPLE_WEIGHT_120 = 13.7  # mg
 
-START_TIME_120 = 4.0 # seconds
-START_TIME_150 = 2.3 # seconds
-START_TIME_180 = 0.0 # seconds
+START_TIME_120 = 4.0 # minutes
+START_TIME_150 = 2.3 # minutes
+START_TIME_180 = 0.0 # minutes
+
+TIME_UNIT_CONVERSION_FACTOR = 60.0  # minutes to seconds

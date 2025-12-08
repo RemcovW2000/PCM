@@ -1,4 +1,5 @@
 from q1 import final_data_120, final_data_150, final_data_180
+from resources.constants import TIME_UNIT_CONVERSION_FACTOR
 
 import matplotlib.pyplot as plt
 
@@ -10,7 +11,7 @@ def integrate_heat_flow_rate(heat_flow_rate, time):
     """
     total_heat_released = [0.0]
     for i in range(1, len(time)):
-        dt = time[i] - time[i - 1]
+        dt = (time[i] - time[i - 1]) * TIME_UNIT_CONVERSION_FACTOR
         avg_heat_flow = (heat_flow_rate[i] + heat_flow_rate[i - 1]) / 2
         total_heat_released.append(total_heat_released[-1] + avg_heat_flow * dt)
     return total_heat_released
@@ -33,7 +34,7 @@ plt.plot(final_data_120['Time'], fraction_cured_120, label='120°C')
 plt.plot(final_data_150['Time'], fraction_cured_150, label='150°C')
 plt.plot(final_data_180['Time'], fraction_cured_180, label='180°C')
 plt.legend()
-plt.xlabel('Time (s)')
+plt.xlabel('Time (minutes)')
 plt.ylabel(r'Degree of cure, $\alpha$')
 plt.title('Degree of cure vs. Time')
 plt.xlim(0, 230)
