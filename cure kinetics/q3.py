@@ -30,14 +30,30 @@ fraction_cured_120 = [h / delta_H_max for h in heat_flow_120]
 fraction_cured_150 = [h / delta_H_max for h in heat_flow_150]
 fraction_cured_180 = [h / delta_H_max for h in heat_flow_180]
 
-plt.plot(final_data_120['Time'], fraction_cured_120, label='120°C')
-plt.plot(final_data_150['Time'], fraction_cured_150, label='150°C')
-plt.plot(final_data_180['Time'], fraction_cured_180, label='180°C')
-plt.legend()
-plt.xlabel('Time (minutes)')
-plt.ylabel(r'Degree of cure, $\alpha$')
-plt.title('Degree of cure vs. Time')
-plt.xlim(0, 230)
-plt.ylim(0, 1.05)
-plt.axhline(y=1.0, color='black', linestyle='--')
-plt.show()
+if __name__ == "__main__":
+    """Plot degree of cure vs. time for the three isothermal datasets."""
+    plt.plot(final_data_120['Time'], fraction_cured_120, label='120°C')
+    plt.plot(final_data_150['Time'], fraction_cured_150, label='150°C')
+    plt.plot(final_data_180['Time'], fraction_cured_180, label='180°C')
+    plt.legend()
+    plt.xlabel('Time (minutes)')
+    plt.ylabel(r'Degree of cure, $\alpha$')
+    plt.title('Degree of cure vs. Time')
+    plt.xlim(0, 230)
+    plt.ylim(0, 1.05)
+    plt.axhline(y=1.0, color='black', linestyle='--')
+    plt.show()
+
+    """log plot for comparison:"""
+    plt.plot(final_data_120['Time'], fraction_cured_120, label='120°C')
+    plt.plot(final_data_150['Time'], fraction_cured_150, label='150°C')
+    plt.plot(final_data_180['Time'], fraction_cured_180, label='180°C')
+    plt.legend()
+    plt.xlabel('Time (minutes)')
+    plt.ylabel(r'Degree of cure, $\alpha$')
+    plt.title('Degree of cure vs. Time')
+    plt.xlim(1, 10e3)
+    plt.xscale('log')
+    plt.ylim(0, 1.1)
+    plt.axhline(y=1.0, color='black', linestyle='--')
+    plt.show()

@@ -120,7 +120,7 @@ final_data_180 = prepare_for_plotting(data_180, sample_weight=SAMPLE_WEIGHT_180)
 time_180 = final_data_180['Time']
 net_heat_flow_180 = final_data_180['Filtered Heat Flow']
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     plt.plot(time_120, net_heat_flow_120, label='120°C')
     plt.plot(time_150, net_heat_flow_150, label='150°C')
     plt.plot(time_180, net_heat_flow_180, label='180°C')
