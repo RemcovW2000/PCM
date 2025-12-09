@@ -29,3 +29,23 @@ if __name__ == "__main__":
     print((k1(A1, E1, T_vals[0]) - dalpha_dt_120[0]) / dalpha_dt_120[0])
     print((k1(A1, E1, T_vals[1]) - dalpha_dt_150[0]) / dalpha_dt_150[0])
     print((k1(A1, E1, T_vals[2]) - dalpha_dt_180[0]) / dalpha_dt_180[0])
+
+
+    index_at_low_alpha_120 = next(
+            i for i, v in enumerate(fraction_cured_120) if v >= 0.01)
+    index_at_low_alpha_150 = next(
+        i for i, v in enumerate(fraction_cured_150) if v >= 0.01)
+    index_at_low_alpha_180 = next(
+        i for i, v in enumerate(fraction_cured_180) if v >= 0.01)
+
+    ln_dalpha_dt = [
+        np.log(dalpha_dt_120[index_at_low_alpha_120]),
+        np.log(dalpha_dt_150[index_at_low_alpha_150]),
+        np.log(dalpha_dt_180[index_at_low_alpha_180])
+    ]
+    plt.plot(1/np.asarray(T_vals), ln_dalpha_dt, 'o-')
+    plt.xlabel('1 / T (1/K)')
+    plt.ylabel('ln(dα/dt) at α=0.01')
+    plt.title('Arrhenius plot at low degree of cure')
+    plt.title('Degree of cure rate vs. Time')
+    plt.show()
