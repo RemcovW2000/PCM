@@ -6,7 +6,7 @@ import re
 
 from matplotlib import pyplot as plt
 from resources.constants import START_TIME_120, START_TIME_150, SAMPLE_WEIGHT_120, \
-    SAMPLE_WEIGHT_150, SAMPLE_WEIGHT_180
+    SAMPLE_WEIGHT_150, SAMPLE_WEIGHT_180, START_TIME_180
 from scipy.signal import butter, filtfilt
 
 
@@ -118,7 +118,7 @@ net_heat_flow_150 = final_data_150['Filtered Heat Flow']
 
 isothermal_180_path = Path(__file__).parent / "resources/isothermal_180.txt"
 data_180 = read_sheet_to_dict(isothermal_180_path)
-final_data_180 = prepare_for_plotting(data_180, sample_weight=SAMPLE_WEIGHT_180)
+final_data_180 = prepare_for_plotting(data_180, sample_weight=SAMPLE_WEIGHT_180, start_time=START_TIME_180)
 time_180 = final_data_180['Time']
 net_heat_flow_180 = final_data_180['Filtered Heat Flow']
 

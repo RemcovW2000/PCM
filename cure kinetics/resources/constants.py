@@ -4,6 +4,6 @@ SAMPLE_WEIGHT_120 = 13.7  # mg
 
 START_TIME_120 = 4.0 # minutes
 START_TIME_150 = 2.3 # minutes
-START_TIME_180 = 0.0 # minutes
+START_TIME_180 = 3.2 # minutes
 
 TIME_UNIT_CONVERSION_FACTOR = 60.0  # minutes to seconds
