@@ -6,9 +6,9 @@ from q1 import final_data_120, final_data_150, final_data_180
 
 from q3 import fraction_cured_120, fraction_cured_150, fraction_cured_180
 
-dalpha_dt_120 = np.gradient(fraction_cured_120, final_data_120['Time'])
-dalpha_dt_150 = np.gradient(fraction_cured_150, final_data_150['Time'])
-dalpha_dt_180 = np.gradient(fraction_cured_180, final_data_180['Time'])
+dalpha_dt_120 = np.gradient(fraction_cured_120, final_data_120['Time Seconds'])
+dalpha_dt_150 = np.gradient(fraction_cured_150, final_data_150['Time Seconds'])
+dalpha_dt_180 = np.gradient(fraction_cured_180, final_data_180['Time Seconds'])
 
 R = 8.314  # J/(mol·K)
 
@@ -26,9 +26,9 @@ def k1(A1, E1, T):
     return A1 * np.exp(-E1 / (R * T))
 
 if __name__ == "__main__":
-    print((k1(A1, E1, T_vals[0]) - dalpha_dt_120[0]) / dalpha_dt_120[0])
-    print((k1(A1, E1, T_vals[1]) - dalpha_dt_150[0]) / dalpha_dt_150[0])
-    print((k1(A1, E1, 180+273.15) - dalpha_dt_180[0]) / dalpha_dt_180[0])
+    print("Error at 120 deg: ", (k1(A1, E1, T_vals[0]) - dalpha_dt_120[0]) / dalpha_dt_120[0])
+    print("Error at 150 deg: ", (k1(A1, E1, T_vals[1]) - dalpha_dt_150[0]) / dalpha_dt_150[0])
+    print("Error at 180 deg: ", (k1(A1, E1, 180+273.15) - dalpha_dt_180[0]) / dalpha_dt_180[0])
     print("E1: ", E1)
     print("A1: ", A1)
 

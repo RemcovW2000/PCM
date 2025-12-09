@@ -6,8 +6,8 @@ import re
 
 from matplotlib import pyplot as plt
 from resources.constants import START_TIME_120, START_TIME_150, SAMPLE_WEIGHT_120, \
-    SAMPLE_WEIGHT_150, SAMPLE_WEIGHT_180, START_TIME_180, RAW_DATA_CUTOFF_FREQ, \
-    FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE, END_TIME_120
+    SAMPLE_WEIGHT_150, SAMPLE_WEIGHT_180, RAW_DATA_CUTOFF_FREQ, \
+    FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE, END_TIME_120, TIME_UNIT_CONVERSION_FACTOR
 from scipy.signal import butter, filtfilt
 
 
@@ -120,6 +120,8 @@ def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, sta
     # apply low-pass filter to heat flow
     data_out['Filtered Heat Flow'] = apply_lowpass_filter(
         data_out['Net Heat Flow'], data_out['Time'], cutoff_freq=RAW_DATA_CUTOFF_FREQ)
+
+    data_out['Time Seconds'] = [t * TIME_UNIT_CONVERSION_FACTOR for t in data_out['Time']]
     return data_out
 
 
