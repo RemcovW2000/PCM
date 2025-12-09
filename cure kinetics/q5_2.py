@@ -1,15 +1,14 @@
 import numpy as np
 from scipy.optimize import minimize
-from q1 import final_data_120, final_data_150, final_data_180
-from q5 import A1, fraction_cured_120, fraction_cured_150, fraction_cured_180, \
-    dalpha_dt_120, dalpha_dt_150, dalpha_dt_180, E1
+from q5 import A1_solution, fraction_cured_120, fraction_cured_150, fraction_cured_180, \
+    dalpha_dt_120, dalpha_dt_150, dalpha_dt_180, E1_solution
 
 
 # Parameter bounds (physical)
 BOUNDS = {
-    'log_A2': (3, 10),      # log10(A2): 1e3 to 1e10
-    'E2': (1e4, 2e5),       # J/mol
-    'm': (0.1, 2.5),
+    'log_A2': (1, 10),      # log10(A2): 1e3 to 1e10
+    'E2': (1e4, 2e10),       # J/mol
+    'm': (0.1, 6),
     'n': (0.1, 2.5)
 }
 
@@ -48,7 +47,7 @@ def normalized_to_params(norm_params):
 
 def da_dt(A2, E2, m, n, alpha, T):
     R = 8.314  # J/(mol·K)
-    term_1 = A1 * np.exp(-E1 / (R * T))
+    term_1 = A1_solution * np.exp(-E1_solution / (R * T))
     term_2 = A2 * np.exp(-E2 / (R * T)) * (alpha ** m)
     return (term_1 + term_2) * ((1 - alpha) ** n)
 
@@ -62,8 +61,6 @@ def calculate_error_normalized(norm_params, dalpha_dt_vals, alpha_vals):
         for i, alpha in enumerate(alpha_vals):
             predicted = da_dt(A2, E2, m, n, alpha, T)
             error += (predicted - actual_rates[i]) ** 2
-
-    print(error)
     return error
 
 
@@ -71,7 +68,7 @@ def find_dalpha_dt_at_alphas(fraction_cured_lst, dalpha_dt_lst, alphas):
     return [np.interp(alpha, fraction_cured_lst, dalpha_dt_lst) for alpha in alphas]
 
 
-alpha_vals = np.linspace(0.01, 0.95, 500)
+alpha_vals = np.linspace(0.2, 0.95, 500)
 
 dalpha_dt_vals = {
     120: find_dalpha_dt_at_alphas(fraction_cured_120, dalpha_dt_120, alpha_vals),
@@ -79,28 +76,28 @@ dalpha_dt_vals = {
     180: find_dalpha_dt_at_alphas(fraction_cured_180, dalpha_dt_180, alpha_vals)
 }
 
+# Initial guesses (physical)
+log_A2_init = 6.0  # A2 = 1e6
+E2_init = 6e4
+m_init = 1.2
+n_init = 1.25
+
+# Convert to normalized space
+x0_norm = params_to_normalized(log_A2_init, E2_init, m_init, n_init)
+
+result = minimize(
+    calculate_error_normalized,
+    x0=x0_norm,
+    args=(dalpha_dt_vals, alpha_vals),
+    method='L-BFGS-B',
+    bounds=[(0, 1), (0, 1), (0, 1), (0, 1)]
+)
+
+A2_solution, E2_solution, m_solution, n_solution = normalized_to_params(result.x)
 if __name__ == "__main__":
-    # Initial guesses (physical)
-    log_A2_init = 6.0  # A2 = 1e6
-    E2_init = 6e4
-    m_init = 1.0
-    n_init = 1.25
-
-    # Convert to normalized space
-    x0_norm = params_to_normalized(log_A2_init, E2_init, m_init, n_init)
-
-    result = minimize(
-        calculate_error_normalized,
-        x0=x0_norm,
-        args=(dalpha_dt_vals, alpha_vals),
-        method='L-BFGS-B',
-        bounds=[(0, 1), (0, 1), (0, 1), (0, 1)]
-    )
-
-    A2_opt, E2_opt, m_opt, n_opt = normalized_to_params(result.x)
     print("Optimized parameters:")
-    print(f"A2: {A2_opt:.3e}")
-    print(f"E2: {E2_opt:.0f}")
-    print(f"m: {m_opt:.3f}")
-    print(f"n: {n_opt:.3f}")
+    print(f"A2: {A2_solution:.3e}")
+    print(f"E2: {E2_solution:.0f}")
+    print(f"m: {m_solution:.3f}")
+    print(f"n: {n_solution:.3f}")
     print(f"Final error: {result.fun:.6e}")
