@@ -1,5 +1,5 @@
 import numpy as np
-
+from resources.constants import START_TIME_150, START_TIME_120
 from q1 import final_data_150, final_data_120, final_data_180
 from q3 import fraction_cured_150, fraction_cured_120, fraction_cured_180
 from q5 import E1_solution, A1_solution
@@ -35,8 +35,12 @@ if __name__ == "__main__":
         sim_results = simulate_cure(A1_solution, E1_solution, A2_solution, E2_solution, m_solution, n_solution, cure_temp, t_lst)[0]
         plt.plot(t_lst, sim_results, label=f'Simulated {cure_temp}°C')
 
-    plt.plot(final_data_120["Time Seconds"], fraction_cured_120, '--')
-    plt.plot(final_data_150["Time Seconds"], fraction_cured_150, '--')
-    plt.plot(final_data_180["Time Seconds"], fraction_cured_180, '--')
+    plt.plot([t - START_TIME_120*60 for t in final_data_120["Time Seconds"]], fraction_cured_120, '--', label='Experimental 120°C')
+    plt.plot([t -START_TIME_150*60 for t in final_data_150["Time Seconds"]], fraction_cured_150, '--', label='Experimental 150°C')
+    plt.plot([t -2.5*60 for t in final_data_180["Time Seconds"]], fraction_cured_180, '--', label='Experimental 180°C')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Degree of Cure (α)')
+    plt.title('Degree of Cure vs. Time')
     plt.xlim(0, 10000)
+    plt.legend()
     plt.show()
