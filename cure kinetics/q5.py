@@ -29,6 +29,8 @@ if __name__ == "__main__":
     print((k1(A1, E1, T_vals[0]) - dalpha_dt_120[0]) / dalpha_dt_120[0])
     print((k1(A1, E1, T_vals[1]) - dalpha_dt_150[0]) / dalpha_dt_150[0])
     print((k1(A1, E1, T_vals[2]) - dalpha_dt_180[0]) / dalpha_dt_180[0])
+    print("E1: ", E1)
+    print("A1: ", A1)
 
 
     index_at_low_alpha_120 = next(
