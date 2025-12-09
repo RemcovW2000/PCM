@@ -12,8 +12,8 @@ dalpha_dt_180 = np.gradient(fraction_cured_180, final_data_180['Time'])
 
 R = 8.314  # J/(mol·K)
 
-d_vals = [dalpha_dt_120[0], dalpha_dt_150[0], dalpha_dt_180[0]]
-T_vals = np.array([120, 150, 180]) + 273.15
+d_vals = [dalpha_dt_120[0], dalpha_dt_150[0]]
+T_vals = np.array([120, 150]) + 273.15
 # linearize and fit: ln(d) = -E1 * (1/(R*T)) + ln(A1)
 x = 1.0 / (R * T_vals)
 y = np.log(d_vals)
@@ -28,7 +28,7 @@ def k1(A1, E1, T):
 if __name__ == "__main__":
     print((k1(A1, E1, T_vals[0]) - dalpha_dt_120[0]) / dalpha_dt_120[0])
     print((k1(A1, E1, T_vals[1]) - dalpha_dt_150[0]) / dalpha_dt_150[0])
-    print((k1(A1, E1, T_vals[2]) - dalpha_dt_180[0]) / dalpha_dt_180[0])
+    print((k1(A1, E1, 180+273.15) - dalpha_dt_180[0]) / dalpha_dt_180[0])
     print("E1: ", E1)
     print("A1: ", A1)
 
@@ -43,7 +43,6 @@ if __name__ == "__main__":
     ln_dalpha_dt = [
         np.log(dalpha_dt_120[index_at_low_alpha_120]),
         np.log(dalpha_dt_150[index_at_low_alpha_150]),
-        np.log(dalpha_dt_180[index_at_low_alpha_180])
     ]
     plt.plot(1/np.asarray(T_vals), ln_dalpha_dt, 'o-')
     plt.xlabel('1 / T (1/K)')

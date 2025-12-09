@@ -53,32 +53,47 @@ def apply_lowpass_filter(data: list[float], time: list[float], cutoff_freq: floa
     x_lp = filtfilt(b, a, x)
     return x_lp.tolist()
 
-def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, start_time: float = 0.0, end_time: Optional[float]= None) ->Dict[str, list[float]]:
+def window_data(data: Dict[str, list[float]], start_time: Optional[float] = None, end_time: Optional[float]=None) -> Dict[str, list[float]]:
     """
-    Prepare the data for plotting by filtering and normalizing.
+    Window the data between start_time (or first exothermic event) and end_time.
     """
     time = np.array(data['Time'])
 
-    # Find the index corresponding to the specified start time
-    index_at_start_time = next(
-        i for i, t in enumerate(time) if t >= start_time)
+    if start_time:
+        index_at_start_time = next(
+            i for i, t in enumerate(time) if t >= start_time)
+    else:
+        index_at_start_time = 0
 
-    # Find the index corresponding to the specified end time
     if end_time:
         index_at_end_time = next(
             i for i, t in enumerate(time) if t >= end_time)
     else:
         index_at_end_time = len(time)
 
+    unsubtracted_heat_flow = np.array(data['Unsubtracted'])
+    baseline_heat_flow = np.array(data['Baseline'])
+    net_heat_flow = unsubtracted_heat_flow - baseline_heat_flow
+
+    index_first_exotherm = next(
+        i for i, v in enumerate(net_heat_flow) if v > 0)
+
+    start_index = max(index_first_exotherm, index_at_start_time)
+
     # copy data from the given data dict.
-    data_intermediate = {}
+    data_out = {}
     for key, item in data.items():
-        data_intermediate[key] = item[index_at_start_time:index_at_end_time]
+        data_out[key] = item[start_index:index_at_end_time]
+    return data_out
 
-    unsubtracted_heat_flow = np.array(data_intermediate['Unsubtracted'])
-    baseline_heat_flow = np.array(data_intermediate['Baseline'])
+def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, start_time: Optional[float]=None, end_time: Optional[float]= None) ->Dict[str, list[float]]:
+    """
+    Prepare the data for plotting by filtering and normalizing.
+    """
+    windowed_data = window_data(data, start_time, end_time)
 
-    # subtract baseline (which is 0 in the dataset)
+    unsubtracted_heat_flow = np.array(windowed_data['Unsubtracted'])
+    baseline_heat_flow = np.array(windowed_data['Baseline'])
     net_heat_flow = unsubtracted_heat_flow - baseline_heat_flow
 
     # Convert to W/g
@@ -90,14 +105,13 @@ def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, sta
             unsubtracted_heat_flow[i+1] = flow
 
     # Normalize to 0 mW at the end of the measurement
-    length = len(net_heat_flow)
-    nr_indices = FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE * length
+    nr_indices = FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE * len(net_heat_flow)
     final_heat_flow_at_end = net_heat_flow[-int(nr_indices):].mean()
     net_heat_flow -= final_heat_flow_at_end
 
     # copy data from the given data dict.
     data_out = {}
-    for key, item in data_intermediate.items():
+    for key, item in windowed_data.items():
         data_out[key] = item
 
     # add net heat flow
@@ -126,7 +140,7 @@ net_heat_flow_150 = final_data_150['Filtered Heat Flow']
 
 isothermal_180_path = Path(__file__).parent / "resources/isothermal_180.txt"
 data_180 = read_sheet_to_dict(isothermal_180_path)
-final_data_180 = prepare_for_plotting(data_180, sample_weight=SAMPLE_WEIGHT_180, start_time=START_TIME_180)
+final_data_180 = prepare_for_plotting(data_180, sample_weight=SAMPLE_WEIGHT_180)
 time_180 = final_data_180['Time']
 net_heat_flow_180 = final_data_180['Filtered Heat Flow']
 
@@ -134,7 +148,7 @@ if __name__ == "__main__":
     plt.plot(time_120, net_heat_flow_120, label='120°C')
     plt.plot(time_150, net_heat_flow_150, label='150°C')
     plt.plot(time_180, net_heat_flow_180, label='180°C')
-    plt.xlim(0, 10)
+    plt.xlim(0, 30)
     plt.axhline(y=0, color='black', linestyle='--')
     plt.axvline(x=0, color='black', linestyle='--')
     plt.xlabel('Time (minutes)')
