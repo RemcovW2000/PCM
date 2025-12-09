@@ -25,6 +25,7 @@ delta_H_150 = heat_flow_150[-1]
 delta_H_180 = heat_flow_180[-1]
 
 delta_H_max = max(delta_H_120, delta_H_150, delta_H_180)
+print(delta_H_120, delta_H_150, delta_H_180, delta_H_max)
 
 fraction_cured_120 = [h / delta_H_max for h in heat_flow_120]
 fraction_cured_150 = [h / delta_H_max for h in heat_flow_150]

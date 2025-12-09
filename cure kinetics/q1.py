@@ -134,7 +134,7 @@ if __name__ == "__main__":
     plt.plot(time_120, net_heat_flow_120, label='120°C')
     plt.plot(time_150, net_heat_flow_150, label='150°C')
     plt.plot(time_180, net_heat_flow_180, label='180°C')
-    plt.xlim(0, 200)
+    plt.xlim(0, 10)
     plt.axhline(y=0, color='black', linestyle='--')
     plt.axvline(x=0, color='black', linestyle='--')
     plt.xlabel('Time (minutes)')
