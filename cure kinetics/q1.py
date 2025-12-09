@@ -6,7 +6,8 @@ import re
 
 from matplotlib import pyplot as plt
 from resources.constants import START_TIME_120, START_TIME_150, SAMPLE_WEIGHT_120, \
-    SAMPLE_WEIGHT_150, SAMPLE_WEIGHT_180, START_TIME_180
+    SAMPLE_WEIGHT_150, SAMPLE_WEIGHT_180, START_TIME_180, RAW_DATA_CUTOFF_FREQ, \
+    FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE
 from scipy.signal import butter, filtfilt
 
 
@@ -72,10 +73,10 @@ def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, sta
     net_heat_flow = net_heat_flow / sample_weight
 
     # Normalize to 0 mW at the end of the measurement
-    final_heat_flow_at_end = net_heat_flow[-100:].mean()
+    length = len(net_heat_flow)
+    nr_indices = FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE * length
+    final_heat_flow_at_end = net_heat_flow[-int(nr_indices):].mean()
     net_heat_flow -= final_heat_flow_at_end
-
-    # hello
 
     # Find the first exothermic event (net heat flow > 0):
     index_first_exotherm = next(
@@ -97,7 +98,7 @@ def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, sta
 
     # apply low-pass filter to heat flow
     data_out['Filtered Heat Flow'] = apply_lowpass_filter(
-        data_out['Net Heat Flow'], data_out['Time'], cutoff_freq=1)
+        data_out['Net Heat Flow'], data_out['Time'], cutoff_freq=RAW_DATA_CUTOFF_FREQ)
     return data_out
 
 
