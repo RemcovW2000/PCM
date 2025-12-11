@@ -11,7 +11,7 @@ class CastroMacosko:
 
     def visc(self, alpha, temperature) -> float:
         term_1 = self.A * np.exp(self.T_b/temperature)
-        term_2 = (self.alpha_g / self.alpha_g - alpha)**(self.c1 + self.c2 * alpha)
+        term_2 = (self.alpha_g / (self.alpha_g - alpha))**(self.c1 + self.c2 * alpha)
         return term_1 * term_2
 
 arocy_l_10 = CastroMacosko(
@@ -33,6 +33,7 @@ for temperature in temperature_list:
 plt.plot(alpha_list, viscs_data[temperature_list[0]], label=f'T={temperature_list[0]-273.15}°C')
 plt.plot(alpha_list, viscs_data[temperature_list[1]], label=f'T={temperature_list[1]-273.15}°C')
 plt.plot(alpha_list, viscs_data[temperature_list[2]], label=f'T={temperature_list[2]-273.15}°C')
+plt.yscale('log')
 plt.xlabel('Degree of Cure (α)')
 plt.ylabel('Viscosity (Pa.s)')
 plt.title('Viscosity vs Degree of Cure at Different Temperatures')
