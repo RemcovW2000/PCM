@@ -102,16 +102,15 @@ for freq, dataset in DMA_results_by_freq.items():
 #---------------------------------------------------------------------------------------
 
 for freq, dataset in DMA_results_by_freq.items():
-    print(len(dataset["E'(G')"]))
     dataset["log_E'_lp"] = apply_lowpass_filter(
         data=dataset["log_E'"],
         time=dataset["Temp."],
-        cutoff_freq=0.05  # 1/°C
+        cutoff_freq=0.25  # 1/°C
     )
     dataset['log_E"_lp'] = apply_lowpass_filter(
         data=dataset['log_E"'],
         time=dataset["Temp."],
-        cutoff_freq=0.05 # 1/°C
+        cutoff_freq=0.25 # 1/°C
     )
 
 # --------------------------------------------------------------------------------------
@@ -133,19 +132,19 @@ if __name__ == "__main__":
     plt.plot(DMA_results_by_freq[0.2]["Temp."], DMA_results_by_freq[0.2]["E'_lp"],
              label='0.2 Hz')
     plt.legend()
-    # plt.yscale('log')
+    plt.yscale('log')
     plt.xlabel('Temperature (°C)')
     plt.ylabel("Storage Modulus E' (Pa)")
     plt.title("Storage Modulus vs Temperature at Different Frequencies")
     plt.show()
 
-    plt.plot(DMA_results_by_freq[20.0]["Temp."], DMA_results_by_freq[20.0]['E"(G")'], label='20 Hz')
-    plt.plot(DMA_results_by_freq[10.0]["Temp."], DMA_results_by_freq[10.0]['E"(G")'], label='10 Hz')
-    plt.plot(DMA_results_by_freq[5.0]["Temp."], DMA_results_by_freq[5.0]['E"(G")'], label='5 Hz')
-    plt.plot(DMA_results_by_freq[1.0]["Temp."], DMA_results_by_freq[1.0]['E"(G")'], label='1 Hz')
-    plt.plot(DMA_results_by_freq[0.2]["Temp."], DMA_results_by_freq[0.2]['E"(G")'], label='0.2 Hz')
+    plt.plot(DMA_results_by_freq[20.0]["Temp."], DMA_results_by_freq[20.0]['log_E"_lp'], label='20 Hz')
+    plt.plot(DMA_results_by_freq[10.0]["Temp."], DMA_results_by_freq[10.0]['log_E"_lp'], label='10 Hz')
+    plt.plot(DMA_results_by_freq[5.0]["Temp."], DMA_results_by_freq[5.0]['log_E"_lp'], label='5 Hz')
+    plt.plot(DMA_results_by_freq[1.0]["Temp."], DMA_results_by_freq[1.0]['log_E"_lp'], label='1 Hz')
+    plt.plot(DMA_results_by_freq[0.2]["Temp."], DMA_results_by_freq[0.2]['log_E"_lp'], label='0.2 Hz')
     plt.legend()
-    plt.yscale('log')
+    # plt.yscale('log')
     plt.xlabel('Temperature (°C)')
     plt.ylabel('Loss Modulus E"(G") (Pa)')
     plt.title("Loss Modulus vs Temperature at Different Frequencies")
