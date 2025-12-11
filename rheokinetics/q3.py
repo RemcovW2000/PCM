@@ -2,7 +2,9 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
+import numpy as np
 from matplotlib import pyplot as plt
+from scipy.signal import butter, filtfilt
 
 
 def read_sheet_to_dict(path: Path) -> Dict[str, List[float]]:
@@ -48,6 +50,25 @@ def filter_dict_by_value(data: Dict[str, List[float]], key: str, upper_limit: fl
 
     return filtered_data
 
+def apply_lowpass_filter(data: list[float], time: list[float], cutoff_freq: float) -> np.ndarray:
+    t = np.array(time)
+    x = np.array(data)
+
+    if len(x) < 9:
+        raise ValueError("Data length must be at least 9 to apply the filter.")
+
+    # 1) sampling frequency (assumes ~uniform spacing)
+    dt = np.mean(np.diff(t))
+    fs = 1.0 / dt
+
+    # 2) design low-pass filter
+    order = 2
+    b, a = butter(order, cutoff_freq / (0.5 * fs), btype="low")
+
+    # 3) apply zero-phase filter
+    x_lp = filtfilt(b, a, x)
+    return x_lp.tolist()
+
 path_to_sheet = Path(__file__).parent / "resources" / "DMA_results.txt"
 DMA_results = read_sheet_to_dict(path_to_sheet)
 
@@ -58,30 +79,71 @@ max_temp_index = DMA_results["Temp."].index(max(DMA_results["Temp."]))
 for key in DMA_results.keys():
     DMA_results[key] = DMA_results[key][:max_temp_index + 1]
 
-DMA_results_20_hz = filter_dict_by_value(DMA_results, key="Freq.", upper_limit=20.0, lower_limit=20.0)
-DMA_results_10_hz = filter_dict_by_value(DMA_results, key="Freq.", upper_limit=10.0, lower_limit=10.0)
-DMA_results_5_hz = filter_dict_by_value(DMA_results, key="Freq.", upper_limit=5.0, lower_limit=5.0)
-DMA_results_1_hz = filter_dict_by_value(DMA_results, key="Freq.", upper_limit=1.0, lower_limit=1.0)
-DMA_results_02_hz = filter_dict_by_value(DMA_results, key="Freq.", upper_limit=0.2, lower_limit=0.2)
+#---------------------------------------------------------------------------------------
+# Organize data by frequency:
+#---------------------------------------------------------------------------------------
+DMA_results_by_freq: Dict[float, Dict[str, List[float]]] = {
+    20.0: filter_dict_by_value(DMA_results, key="Freq.", upper_limit=20.0, lower_limit=20.0),
+    10.0: filter_dict_by_value(DMA_results, key="Freq.", upper_limit=10.0, lower_limit=10.0),
+    5.0: filter_dict_by_value(DMA_results, key="Freq.", upper_limit=5.0, lower_limit=5.0),
+    1.0: filter_dict_by_value(DMA_results, key="Freq.", upper_limit=1.0, lower_limit=1.0),
+    0.2: filter_dict_by_value(DMA_results, key="Freq.", upper_limit=0.3, lower_limit=0.1),
+}
+
+#---------------------------------------------------------------------------------------
+# add log data to datasets:
+#---------------------------------------------------------------------------------------
+for freq, dataset in DMA_results_by_freq.items():
+    dataset["log_E'"] = [np.log10(value) for value in dataset["E'(G')"]]
+    dataset['log_E"'] = [np.log10(value) for value in dataset['E"(G")']]
+
+#---------------------------------------------------------------------------------------
+# Apply low-pass filter to log data:
+#---------------------------------------------------------------------------------------
+
+for freq, dataset in DMA_results_by_freq.items():
+    print(len(dataset["E'(G')"]))
+    dataset["log_E'_lp"] = apply_lowpass_filter(
+        data=dataset["log_E'"],
+        time=dataset["Temp."],
+        cutoff_freq=0.05  # 1/°C
+    )
+    dataset['log_E"_lp'] = apply_lowpass_filter(
+        data=dataset['log_E"'],
+        time=dataset["Temp."],
+        cutoff_freq=0.05 # 1/°C
+    )
+
+# --------------------------------------------------------------------------------------
+# convert filtered log data back to linear scale:
+# --------------------------------------------------------------------------------------
+for freq, dataset in DMA_results_by_freq.items():
+    dataset["E'_lp"] = [10**value for value in dataset["log_E'_lp"]]
+    dataset['E"_lp'] = [10**value for value in dataset['log_E"_lp']]
 
 if __name__ == "__main__":
-    plt.plot(DMA_results_20_hz["Temp."], DMA_results_20_hz["E'(G')"], label='20 Hz')
-    plt.plot(DMA_results_10_hz["Temp."], DMA_results_10_hz["E'(G')"], label='10 Hz')
-    plt.plot(DMA_results_5_hz["Temp."], DMA_results_5_hz["E'(G')"], label='5 Hz')
-    plt.plot(DMA_results_1_hz["Temp."], DMA_results_1_hz["E'(G')"], label='1 Hz')
-    plt.plot(DMA_results_02_hz["Temp."], DMA_results_02_hz["E'(G')"], label='0.2 Hz')
+    plt.plot(DMA_results_by_freq[20.0]["Temp."], DMA_results_by_freq[20.0]["E'_lp"],
+             label='20 Hz')
+    plt.plot(DMA_results_by_freq[10.0]["Temp."], DMA_results_by_freq[10.0]["E'_lp"],
+             label='10 Hz')
+    plt.plot(DMA_results_by_freq[5.0]["Temp."], DMA_results_by_freq[5.0]["E'_lp"],
+             label='5 Hz')
+    plt.plot(DMA_results_by_freq[1.0]["Temp."], DMA_results_by_freq[1.0]["E'_lp"],
+             label='1 Hz')
+    plt.plot(DMA_results_by_freq[0.2]["Temp."], DMA_results_by_freq[0.2]["E'_lp"],
+             label='0.2 Hz')
     plt.legend()
-    plt.yscale('log')
+    # plt.yscale('log')
     plt.xlabel('Temperature (°C)')
     plt.ylabel("Storage Modulus E' (Pa)")
     plt.title("Storage Modulus vs Temperature at Different Frequencies")
     plt.show()
 
-    plt.plot(DMA_results_20_hz["Temp."], DMA_results_20_hz['E"(G")'], label='20 Hz')
-    plt.plot(DMA_results_10_hz["Temp."], DMA_results_10_hz['E"(G")'], label='10 Hz')
-    plt.plot(DMA_results_5_hz["Temp."], DMA_results_5_hz['E"(G")'], label='5 Hz')
-    plt.plot(DMA_results_1_hz["Temp."], DMA_results_1_hz['E"(G")'], label='1 Hz')
-    plt.plot(DMA_results_02_hz["Temp."], DMA_results_02_hz['E"(G")'], label='0.2 Hz')
+    plt.plot(DMA_results_by_freq[20.0]["Temp."], DMA_results_by_freq[20.0]['E"(G")'], label='20 Hz')
+    plt.plot(DMA_results_by_freq[10.0]["Temp."], DMA_results_by_freq[10.0]['E"(G")'], label='10 Hz')
+    plt.plot(DMA_results_by_freq[5.0]["Temp."], DMA_results_by_freq[5.0]['E"(G")'], label='5 Hz')
+    plt.plot(DMA_results_by_freq[1.0]["Temp."], DMA_results_by_freq[1.0]['E"(G")'], label='1 Hz')
+    plt.plot(DMA_results_by_freq[0.2]["Temp."], DMA_results_by_freq[0.2]['E"(G")'], label='0.2 Hz')
     plt.legend()
     plt.yscale('log')
     plt.xlabel('Temperature (°C)')
