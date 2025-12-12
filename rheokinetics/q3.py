@@ -1,3 +1,4 @@
+import enum
 import re
 from pathlib import Path
 from typing import Dict, List
@@ -5,6 +6,20 @@ from typing import Dict, List
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import butter, filtfilt
+
+class headers(enum.Enum):
+    TEMP = "Temp."
+    FREQ = "Freq."
+    STORAGE_MODULUS = "E'(G')"
+    LOSS_MODULUS = 'E"(G")'
+
+    LOG_STORAGE_MODULUS = "log_E'"
+    LOG_LOSS_MODULUS = 'log_E"'
+    FILTERED_LOG_STORAGE_MODULUS = "log_E'_lp"
+    FILTERED_LOG_LOSS_MODULUS = 'log_E"_lp'
+
+    DERIVATIVE_LOG_STORAGE_MODULUS = "dlogE'_dT"
+    DERIVATIVE_LOG_LOSS_MODULUS = 'dlogE"_dT'
 
 
 def read_sheet_to_dict(path: Path) -> Dict[str, List[float]]:
@@ -94,22 +109,22 @@ DMA_results_by_freq: Dict[float, Dict[str, List[float]]] = {
 # add log data to datasets:
 #---------------------------------------------------------------------------------------
 for freq, dataset in DMA_results_by_freq.items():
-    dataset["log_E'"] = [np.log10(value) for value in dataset["E'(G')"]]
-    dataset['log_E"'] = [np.log10(value) for value in dataset['E"(G")']]
+    dataset[headers.LOG_STORAGE_MODULUS.value] = [np.log10(value) for value in dataset[headers.STORAGE_MODULUS.value]]
+    dataset[headers.LOG_LOSS_MODULUS.value] = [np.log10(value) for value in dataset[headers.LOSS_MODULUS.value]]
 
 #---------------------------------------------------------------------------------------
 # Apply low-pass filter to log data:
 #---------------------------------------------------------------------------------------
 
 for freq, dataset in DMA_results_by_freq.items():
-    dataset["log_E'_lp"] = apply_lowpass_filter(
-        data=dataset["log_E'"],
-        time=dataset["Temp."],
+    dataset[headers.FILTERED_LOG_LOSS_MODULUS.value] = apply_lowpass_filter(
+        data=dataset[headers.LOG_LOSS_MODULUS.value],
+        time=dataset[headers.TEMP.value],
         cutoff_freq=0.25  # 1/°C
     )
-    dataset['log_E"_lp'] = apply_lowpass_filter(
-        data=dataset['log_E"'],
-        time=dataset["Temp."],
+    dataset[headers.FILTERED_LOG_STORAGE_MODULUS.value] = apply_lowpass_filter(
+        data=dataset[headers.LOG_STORAGE_MODULUS.value],
+        time=dataset[headers.TEMP.value],
         cutoff_freq=0.25 # 1/°C
     )
 
@@ -121,15 +136,15 @@ for freq, dataset in DMA_results_by_freq.items():
     dataset['E"_lp'] = [10**value for value in dataset['log_E"_lp']]
 
 if __name__ == "__main__":
-    plt.plot(DMA_results_by_freq[20.0]["Temp."], DMA_results_by_freq[20.0]["E'_lp"],
+    plt.plot(DMA_results_by_freq[20.0][headers.TEMP.value], DMA_results_by_freq[20.0][headers.LOG_STORAGE_MODULUS.value],
              label='20 Hz')
-    plt.plot(DMA_results_by_freq[10.0]["Temp."], DMA_results_by_freq[10.0]["E'_lp"],
+    plt.plot(DMA_results_by_freq[10.0][headers.TEMP.value], DMA_results_by_freq[10.0][headers.LOG_STORAGE_MODULUS.value],
              label='10 Hz')
-    plt.plot(DMA_results_by_freq[5.0]["Temp."], DMA_results_by_freq[5.0]["E'_lp"],
+    plt.plot(DMA_results_by_freq[5.0][headers.TEMP.value], DMA_results_by_freq[5.0][headers.LOG_STORAGE_MODULUS.value],
              label='5 Hz')
-    plt.plot(DMA_results_by_freq[1.0]["Temp."], DMA_results_by_freq[1.0]["E'_lp"],
+    plt.plot(DMA_results_by_freq[1.0][headers.TEMP.value], DMA_results_by_freq[1.0][headers.LOG_STORAGE_MODULUS.value],
              label='1 Hz')
-    plt.plot(DMA_results_by_freq[0.2]["Temp."], DMA_results_by_freq[0.2]["E'_lp"],
+    plt.plot(DMA_results_by_freq[0.2][headers.TEMP.value], DMA_results_by_freq[0.2][headers.LOG_STORAGE_MODULUS.value],
              label='0.2 Hz')
     plt.legend()
     plt.yscale('log')
