@@ -35,6 +35,17 @@ class straight_line:
     def value_at(self, x: float) -> float:
         return self.slope * (x - self.intersection_point.x) + self.intersection_point.y
 
+    def intersect(self, other: 'straight_line') -> Point2D:
+        if self.slope == other.slope:
+            raise ValueError("Lines are parallel and do not intersect.")
+
+        x_intersect = (other.intersection_point.y - self.intersection_point.y +
+                       self.slope * self.intersection_point.x -
+                       other.slope * other.intersection_point.x) / (self.slope - other.slope)
+
+        y_intersect = self.value_at(x_intersect)
+        return Point2D(x_intersect, y_intersect)
+
 for freq, dataset in DMA_results_by_freq.items():
     index_at_120_deg = next(i for i, temp in enumerate(dataset[headers.TEMP.value]) if temp >= 120.0)
     dlogE_dT = dataset[headers.DERIVATIVE_LOG_STORAGE_MODULUS.value][:index_at_120_deg]
@@ -93,6 +104,32 @@ if __name__ == "__main__":
             linestyle='--',
         )
         ax[i].legend(loc='upper right', fontsize='small')
+
+        intersection_pt = DMA_results_by_freq[freq]['tangent_line_at_min'].intersect(
+            DMA_results_by_freq[freq]['tangent_line_at_start'])
+
+        ax[i].axvline(
+            x=intersection_pt.x,
+            color='red',
+            linestyle=':'
+        )
+
+        x = intersection_pt.x
+        label = f"Tg = {x:.2f}"  # format as desired
+
+        ax[i].annotate(
+            label,
+            xy=(x, 1.0),
+            xycoords=('data', 'axes fraction'),
+            # x in data coords, y as fraction of the axes height
+            xytext=(0, 6),  # nudge label a few points above the top
+            textcoords='offset points',
+            ha='center',
+            va='bottom',
+            color='red',
+            fontsize='small',
+            bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)
+        )
 
     # Figure-level labels and title
     fig.suptitle(
