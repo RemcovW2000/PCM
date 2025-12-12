@@ -100,9 +100,9 @@ def prepare_for_plotting(data: Dict[str, list[float]], sample_weight: float, sta
     net_heat_flow = net_heat_flow / sample_weight
 
     # Remove numerical spikes (as seen in 180 deg data)
-    for i, flow in enumerate(unsubtracted_heat_flow[:-1]):
+    for i, flow in enumerate(unsubtracted_heat_flow[:-2]):
         if flow / unsubtracted_heat_flow[i+1] >5:
-            unsubtracted_heat_flow[i+1] = flow
+            unsubtracted_heat_flow[i+1] = (flow + unsubtracted_heat_flow[i+2]) / 2
 
     # Normalize to 0 mW at the end of the measurement
     nr_indices = FRACTION_OF_DATA_TO_AVERAGE_FOR_BASELINE * len(net_heat_flow)
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     plt.plot(time_120, net_heat_flow_120, label='120°C')
     plt.plot(time_150, net_heat_flow_150, label='150°C')
     plt.plot(time_180, net_heat_flow_180, label='180°C')
-    plt.xlim(0, 30)
+    plt.xlim(0, 120)
     plt.axhline(y=0, color='black', linestyle='--')
     plt.axvline(x=0, color='black', linestyle='--')
     plt.xlabel('Time (minutes)')
