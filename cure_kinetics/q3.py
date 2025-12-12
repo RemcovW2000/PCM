@@ -1,3 +1,5 @@
+import numpy as np
+
 from q1 import final_data_120, final_data_150, final_data_180
 
 import matplotlib.pyplot as plt
@@ -26,8 +28,13 @@ delta_H_180 = heat_flow_180[-1]
 delta_H_max = max(delta_H_120, delta_H_150, delta_H_180)
 
 fraction_cured_120 = [h / delta_H_max for h in heat_flow_120]
+cure_rate_120 = np.gradient(fraction_cured_120, final_data_120['Time Seconds'])
+
 fraction_cured_150 = [h / delta_H_max for h in heat_flow_150]
+cure_rate_150 = np.gradient(fraction_cured_150, final_data_150['Time Seconds'])
+
 fraction_cured_180 = [h / delta_H_max for h in heat_flow_180]
+cure_rate_180 = np.gradient(fraction_cured_180, final_data_180['Time Seconds'])
 
 if __name__ == "__main__":
     """Plot degree of cure vs. time for the three isothermal datasets."""
@@ -37,8 +44,8 @@ if __name__ == "__main__":
     plt.legend()
     plt.xlabel('Time (minutes)')
     plt.ylabel(r'Degree of cure, $\alpha$')
-    plt.title('Degree of cure vs. Time')
-    plt.xlim(0, 230)
+    plt.title('Degree of cure vs. Time, ')
+    plt.xlim(0, 140)
     plt.ylim(0, 1.05)
     plt.axhline(y=1.0, color='black', linestyle='--')
     plt.show()
