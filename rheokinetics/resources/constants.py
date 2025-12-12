@@ -1,0 +1,1 @@
+LOG_DATA_CUTOFF_FREQ = 0.1  # 1/min
