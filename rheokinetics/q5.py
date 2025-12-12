@@ -61,35 +61,45 @@ for freq, dataset in DMA_results_by_freq.items():
     dataset['tangent_line_at_start'] = straight_line(slope_start, intersection_point)
 
 if __name__ == "__main__":
-    fig, ax = plt.subplots()
+    # python
+    fig, ax = plt.subplots(5, 1, sharex=True, figsize=(7, 10))
 
-    ax.plot(DMA_results_by_freq[20.0]["Temp."], DMA_results_by_freq[20.0][headers.FILTERED_LOG_STORAGE_MODULUS.value],
-             label='20 Hz')
-    ax.set_ylim(7.5, 10)
-    ax.axline(
-        xy1=(
-            DMA_results_by_freq[20.0]['tangent_line_at_min'].intersection_point.x,
-            DMA_results_by_freq[20.0]['tangent_line_at_min'].intersection_point.y
-        ),
-        slope=DMA_results_by_freq[20.0]['tangent_line_at_min'].slope,
-        color='orange',
-        linestyle='--',
-        label='Tangent at min dlogE\'/dT (20 Hz)'
-    )
+    for i, freq in enumerate(sorted(DMA_results_by_freq.keys())):
+        ax[i].plot(
+            DMA_results_by_freq[freq]["Temp."],
+            DMA_results_by_freq[freq][headers.FILTERED_LOG_STORAGE_MODULUS.value],
+            label=f'{freq} Hz'
+        )
+        ax[i].set_ylim(7.5, 10)
+        ax[i].set_xlim(70, 120)
 
-    ax.axline(
-        xy1=(
-            DMA_results_by_freq[20.0]['tangent_line_at_start'].intersection_point.x,
-            DMA_results_by_freq[20.0]['tangent_line_at_start'].intersection_point.y
-        ),
-        slope=DMA_results_by_freq[20.0]['tangent_line_at_start'].slope,
-        color='orange',
-        linestyle='--',
-        label='Tangent at min dlogE\'/dT (20 Hz)'
-    )
+        ax[i].axline(
+            xy1=(
+                DMA_results_by_freq[freq]['tangent_line_at_min'].intersection_point.x,
+                DMA_results_by_freq[freq]['tangent_line_at_min'].intersection_point.y
+            ),
+            slope=DMA_results_by_freq[freq]['tangent_line_at_min'].slope,
+            color='orange',
+            linestyle='--',
+        )
 
-    plt.legend()
-    plt.xlabel('Temperature (°C)')
-    plt.ylabel("dlogE'/dT (1/°C)")
-    plt.title("Derivative of log Storage Modulus vs Temperature at Different Frequencies")
+        ax[i].axline(
+            xy1=(
+                DMA_results_by_freq[freq]['tangent_line_at_start'].intersection_point.x,
+                DMA_results_by_freq[freq]['tangent_line_at_start'].intersection_point.y
+            ),
+            slope=DMA_results_by_freq[freq]['tangent_line_at_start'].slope,
+            color='orange',
+            linestyle='--',
+        )
+        ax[i].legend(loc='upper right', fontsize='small')
+
+    # Figure-level labels and title
+    fig.suptitle(
+        "Derivative of log Storage Modulus vs Temperature at Different Frequencies")
+    fig.supxlabel('Temperature (°C)')
+    fig.supylabel("dlogE'/dT (1/°C)")
+
+    # Reserve space for the suptitle and prevent overlap
+    fig.tight_layout(rect=[0, 0, 1, 0.95])  # adjust top for the suptitle
     plt.show()
