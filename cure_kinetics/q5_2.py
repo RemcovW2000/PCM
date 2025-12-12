@@ -6,6 +6,10 @@ from resources.constants import R
 from q3 import fraction_cured_120, fraction_cured_180, cure_rate_120, cure_rate_180
 from q5 import E1_solution, A1_solution, dalpha_dt_120, dalpha_dt_180
 
+#---------------------------------------------------------------------------------------
+# Solving for A2, E2, m, n:
+#---------------------------------------------------------------------------------------
+
 def k1(T):
     return A1_solution * np.exp(-E1_solution / (R * T))
 
@@ -69,6 +73,10 @@ print("A2 =", A2_solution)
 print("E2 =", E2_solution)
 print("m  =", m_solution)
 print("n  =", n_solution)
+
+#---------------------------------------------------------------------------------------
+# Simulating cure:
+#---------------------------------------------------------------------------------------
 
 def da_dt(A1, E1, A2, E2, m, n, alpha, T):
     R = 8.314  # J/(mol·K)
