@@ -9,12 +9,12 @@ from rheokinetics.q3 import DMA_results_by_freq, headers
 # find derivative of log_E' with respect to Temp.
 
 for freq, dataset in DMA_results_by_freq.items():
-    log_E_prime = dataset[headers.LOG_STORAGE_MODULUS.value]
+    log_E_prime = dataset[headers.FILTERED_LOG_STORAGE_MODULUS.value]
     temperature = dataset[headers.TEMP.value]
     dlogE_dT = np.gradient(log_E_prime, temperature)
     dataset[headers.DERIVATIVE_LOG_STORAGE_MODULUS.value] = dlogE_dT
 
-    log_E_prime = dataset[headers.LOG_LOSS_MODULUS.value]
+    log_E_prime = dataset[headers.FILTERED_LOG_LOSS_MODULUS.value]
     dlogE_dT = np.gradient(log_E_prime, temperature)
     dataset[headers.DERIVATIVE_LOG_LOSS_MODULUS.value] = dlogE_dT
 
