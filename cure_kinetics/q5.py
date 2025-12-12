@@ -1,7 +1,6 @@
 # find d halpha/ dt ad alpha = 0 for all three datasets
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib.ticker as mticker
 
 from q1 import final_data_120, final_data_150, final_data_180
 
@@ -15,8 +14,7 @@ R = 8.314  # J/(mol·K)
 
 d_vals = [dalpha_dt_120[0], dalpha_dt_150[0]]
 T_vals = np.array([120, 150]) + 273.15
-
-# linearize and and use least squares to fit: ln(d) = -E1 * (1/(R*T)) + ln(A1_solution)
+# linearize and fit: ln(d) = -E1 * (1/(R*T)) + ln(A1_solution)
 x = 1.0 / (R * T_vals)
 y = np.log(d_vals)
 m, b = np.polyfit(x, y, 1)
@@ -46,11 +44,9 @@ if __name__ == "__main__":
         np.log(dalpha_dt_120[index_at_low_alpha_120]),
         np.log(dalpha_dt_150[index_at_low_alpha_150]),
     ]
-    fig, ax = plt.subplots()
-
-    ax.plot(1/np.asarray(T_vals), ln_dalpha_dt, 'o-')
-    ax.xaxis.set_major_locator(mticker.MaxNLocator(nbins=6))
+    plt.plot(1/np.asarray(T_vals), ln_dalpha_dt, 'o-')
     plt.xlabel('1 / T (1/K)')
     plt.ylabel('ln(dα/dt) at α=0.01')
-    plt.title('Curing Rate at Low Degree of Cure, at 120, 150 °C')
+    plt.title('Arrhenius plot at low degree of cure')
+    plt.title('Degree of cure rate vs. Time')
     plt.show()
