@@ -27,12 +27,12 @@ Vf = np.arange(0.35, 0.66, 0.05)
 # Permeability function
 # ----------------------------
 def kozeny_carman(Vf, R=R, k=k):
-    return (R**2 / (4*k)) * ((1 - Vf)**3 / Vf**2)
+    return (R** 2 / (4*k)) * ((1 - Vf)** 3 / Vf **2)
 
 K_nom = kozeny_carman(Vf)
 
-# Required pressure: ΔP = η * L / (K * t)
-deltaP_nom = eta * L / (K_nom * t_infusion)  # in Pa
+# Required pressure: ΔP = (L^2 * η) / (K * t)
+deltaP_nom = (L**2 * eta) / (K_nom * t_infusion)  # in Pa
 
 # ----------------------------
 # Plotting ΔP vs Vf
@@ -46,7 +46,7 @@ ax.plot(Vf, deltaP_nom/1e5, marker='o', linestyle='-', color='blue', label='ΔP 
 colors = ['red', 'green', 'orange']
 for Vf_r, t_r, color in zip(Vf_regions, thickness_mm, colors):
     K_r = kozeny_carman(Vf_r)
-    deltaP_r = eta * L / (K_r * t_infusion) / 1e5  # convert to bar
+    deltaP_r = (L**2 * eta) / (K_r * t_infusion) / 1e5  # convert to bar
     ax.plot(Vf_r, deltaP_r, marker='x', markersize=10, color=color)
     ax.text(Vf_r + 0.002, deltaP_r*1.05, f'{t_r} mm', color=color, fontsize=10)
 
