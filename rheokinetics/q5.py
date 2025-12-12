@@ -109,95 +109,95 @@ for freq, dataset in DMA_results_by_freq.items():
     inflection_pt = inflection_points[0]
     dataset['inflection_point'] = inflection_pt
 
-if __name__ == "__main__":
-    # python
-    fig, ax = plt.subplots(5, 1, sharex=True, figsize=(7, 10))
 
-    for i, freq in enumerate(sorted(DMA_results_by_freq.keys())):
-        ax[i].plot(
-            DMA_results_by_freq[freq]["Temp."],
-            DMA_results_by_freq[freq][headers.FILTERED_LOG_STORAGE_MODULUS.value],
-            label=f'{freq} Hz'
-        )
-        ax[i].set_ylim(7.5, 10)
-        ax[i].set_xlim(70, 120)
+fig, ax = plt.subplots(5, 1, sharex=True, figsize=(7, 10))
 
-        ax[i].axline(
-            xy1=(
-                DMA_results_by_freq[freq]['tangent_line_at_min'].intersection_point.x,
-                DMA_results_by_freq[freq]['tangent_line_at_min'].intersection_point.y
-            ),
-            slope=DMA_results_by_freq[freq]['tangent_line_at_min'].slope,
-            color='orange',
-            linestyle='--',
-        )
+for i, freq in enumerate(sorted(DMA_results_by_freq.keys())):
+    ax[i].plot(
+        DMA_results_by_freq[freq]["Temp."],
+        DMA_results_by_freq[freq][headers.FILTERED_LOG_STORAGE_MODULUS.value],
+        label=f'{freq} Hz'
+    )
+    ax[i].set_ylim(7.5, 10)
+    ax[i].set_xlim(70, 120)
 
-        ax[i].axline(
-            xy1=(
-                DMA_results_by_freq[freq]['tangent_line_at_start'].intersection_point.x,
-                DMA_results_by_freq[freq]['tangent_line_at_start'].intersection_point.y
-            ),
-            slope=DMA_results_by_freq[freq]['tangent_line_at_start'].slope,
-            color='orange',
-            linestyle='--',
-        )
-        ax[i].legend(loc='upper right', fontsize='small')
+    ax[i].axline(
+        xy1=(
+            DMA_results_by_freq[freq]['tangent_line_at_min'].intersection_point.x,
+            DMA_results_by_freq[freq]['tangent_line_at_min'].intersection_point.y
+        ),
+        slope=DMA_results_by_freq[freq]['tangent_line_at_min'].slope,
+        color='orange',
+        linestyle='--',
+    )
 
-        intersection_pt = DMA_results_by_freq[freq]['tangent_line_at_min'].intersect(
-            DMA_results_by_freq[freq]['tangent_line_at_start'])
+    ax[i].axline(
+        xy1=(
+            DMA_results_by_freq[freq]['tangent_line_at_start'].intersection_point.x,
+            DMA_results_by_freq[freq]['tangent_line_at_start'].intersection_point.y
+        ),
+        slope=DMA_results_by_freq[freq]['tangent_line_at_start'].slope,
+        color='orange',
+        linestyle='--',
+    )
+    ax[i].legend(loc='upper right', fontsize='small')
+
+    intersection_pt = DMA_results_by_freq[freq]['tangent_line_at_min'].intersect(
+        DMA_results_by_freq[freq]['tangent_line_at_start'])
 
 
-        tg_from_tangent_lines = intersection_pt.x
+    tg_from_tangent_lines = intersection_pt.x
 
-        ax[i].axvline(
-            x=intersection_pt.x,
-            color='red',
-            linestyle=':'
-        )
+    ax[i].axvline(
+        x=intersection_pt.x,
+        color='red',
+        linestyle=':'
+    )
 
-        label = f"Tg (intersection) = {tg_from_tangent_lines:.2f} °C"  # format as desired
+    label = f"Tg (intersection) = {tg_from_tangent_lines:.2f} °C"  # format as desired
 
-        ax[i].annotate(
-            label,
-            xy=(tg_from_tangent_lines, 1.0),
-            xycoords=('data', 'axes fraction'),
-            # x in data coords, y as fraction of the axes height
-            xytext=(0, 6),  # nudge label a few points above the top
-            textcoords='offset points',
-            ha='right',
-            va='bottom',
-            color='red',
-            fontsize='small',
-            bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)
-        )
+    ax[i].annotate(
+        label,
+        xy=(tg_from_tangent_lines, 1.0),
+        xycoords=('data', 'axes fraction'),
+        # x in data coords, y as fraction of the axes height
+        xytext=(0, 6),  # nudge label a few points above the top
+        textcoords='offset points',
+        ha='right',
+        va='bottom',
+        color='red',
+        fontsize='small',
+        bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)
+    )
 
-        tg_from_inflection_point = DMA_results_by_freq[freq]['inflection_point']
-        ax[i].axvline(
-            x=tg_from_inflection_point,
-            color='red',
-            linestyle=':'
-        )
-        label = f"Tg (inflection) = {tg_from_inflection_point:.2f} °C"
+    tg_from_inflection_point = DMA_results_by_freq[freq]['inflection_point']
+    ax[i].axvline(
+        x=tg_from_inflection_point,
+        color='red',
+        linestyle=':'
+    )
+    label = f"Tg (inflection) = {tg_from_inflection_point:.2f} °C"
 
-        ax[i].annotate(
-            label,
-            xy=(tg_from_inflection_point, 1.0),
-            xycoords=('data', 'axes fraction'),
-            xytext=(0, 6),
-            textcoords='offset points',
-            ha='left',
-            va='bottom',
-            color='red',
-            fontsize='small',
-            bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)
-        )
+    ax[i].annotate(
+        label,
+        xy=(tg_from_inflection_point, 1.0),
+        xycoords=('data', 'axes fraction'),
+        xytext=(0, 6),
+        textcoords='offset points',
+        ha='left',
+        va='bottom',
+        color='red',
+        fontsize='small',
+        bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)
+    )
+    DMA_results_by_freq[freq]['Tg_from_tangent'] = tg_from_tangent_lines
+    DMA_results_by_freq[freq]['Tg_from_inflection'] = tg_from_inflection_point
 
-    # Figure-level labels and title
-    fig.suptitle(
-        "Tg determined from Tangent Line Intersection and Inflection Point Methods",)
-    fig.supxlabel('Temperature (°C)')
-    fig.supylabel("dlogE'/dT (1/°C)")
+# Figure-level labels and title
+fig.suptitle(
+    "Tg determined from Tangent Line Intersection and Inflection Point Methods",)
+fig.supxlabel('Temperature (°C)')
+fig.supylabel("dlogE'/dT (1/°C)")
 
-    # Reserve space for the suptitle and prevent overlap
-    fig.tight_layout(rect=[0, 0, 1, 0.95])  # adjust top for the suptitle
-    plt.show()
+fig.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
