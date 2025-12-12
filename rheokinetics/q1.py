@@ -33,6 +33,7 @@ for temperature in temperature_list:
 plt.plot(alpha_list, viscs_data[temperature_list[0]], label=f'T={temperature_list[0]-273.15}°C')
 plt.plot(alpha_list, viscs_data[temperature_list[1]], label=f'T={temperature_list[1]-273.15}°C')
 plt.plot(alpha_list, viscs_data[temperature_list[2]], label=f'T={temperature_list[2]-273.15}°C')
+plt.ylim(1e-3, 1e3)
 plt.yscale('log')
 plt.xlabel('Degree of Cure (α)')
 plt.ylabel('Viscosity (Pa.s)')
