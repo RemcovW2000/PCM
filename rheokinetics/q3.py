@@ -21,6 +21,9 @@ class headers(enum.Enum):
     DERIVATIVE_LOG_STORAGE_MODULUS = "dlogE'_dT"
     DERIVATIVE_LOG_LOSS_MODULUS = 'dlogE"_dT'
 
+    DERIVATIVE_2_LOG_STORAGE_MODULUS = "d2logE'_dT2"
+    DERIVATIVE_2_LOG_LOSS_MODULUS = 'd2logE"_dT2'
+
 
 def read_sheet_to_dict(path: Path) -> Dict[str, List[float]]:
     """

@@ -9,12 +9,12 @@ from rheokinetics.q3 import DMA_results_by_freq, headers
 # find derivative of log_E' with respect to Temp.
 
 for freq, dataset in DMA_results_by_freq.items():
-    log_E_prime = dataset[headers.FILTERED_LOG_STORAGE_MODULUS.value]
+    log_E_prime = dataset[headers.LOG_STORAGE_MODULUS.value]
     temperature = dataset[headers.TEMP.value]
     dlogE_dT = np.gradient(log_E_prime, temperature)
     dataset[headers.DERIVATIVE_LOG_STORAGE_MODULUS.value] = dlogE_dT
 
-    log_E_prime = dataset[headers.FILTERED_LOG_LOSS_MODULUS.value]
+    log_E_prime = dataset[headers.LOG_STORAGE_MODULUS.value]
     dlogE_dT = np.gradient(log_E_prime, temperature)
     dataset[headers.DERIVATIVE_LOG_LOSS_MODULUS.value] = dlogE_dT
 
@@ -71,6 +71,44 @@ for freq, dataset in DMA_results_by_freq.items():
     )
     dataset['tangent_line_at_start'] = straight_line(slope_start, intersection_point)
 
+# ---------------------------------------------------------------------------------------
+# find 2nd derivative, find inflection points where 2nd derivative crosses zero
+# ---------------------------------------------------------------------------------------
+
+for freq, dataset in DMA_results_by_freq.items():
+    log_E_d_prime = dataset[headers.DERIVATIVE_LOG_STORAGE_MODULUS.value]
+    temperature = dataset[headers.TEMP.value]
+    dlogE_dT = np.gradient(log_E_d_prime, temperature)
+    dataset[headers.DERIVATIVE_2_LOG_STORAGE_MODULUS.value] = dlogE_dT
+
+    log_E_d_prime = dataset[headers.DERIVATIVE_LOG_LOSS_MODULUS.value]
+    dlogE_dT = np.gradient(log_E_d_prime, temperature)
+    dataset[headers.DERIVATIVE_2_LOG_STORAGE_MODULUS.value] = dlogE_dT
+
+    start_index = next(
+        i for i, temp in enumerate(dataset[headers.TEMP.value]) if temp >= 85.0)
+    end_index = next(
+        i for i, temp in enumerate(dataset[headers.TEMP.value]) if temp >= 105.0)
+
+    second_derivative_segment = dataset[headers.DERIVATIVE_2_LOG_STORAGE_MODULUS.value][
+                                start_index:end_index]
+    temp_segment = dataset[headers.TEMP.value][start_index:end_index]
+    zero_crossings = np.where(np.diff(np.sign(second_derivative_segment)))[0]
+    inflection_points = []
+    for crossing in zero_crossings:
+        t1 = temp_segment[crossing]
+        t2 = temp_segment[crossing + 1]
+        y1 = second_derivative_segment[crossing]
+        y2 = second_derivative_segment[crossing + 1]
+        t_inflect = t1 - y1 * (t2 - t1) / (y2 - y1)
+        inflection_points.append(t_inflect)
+
+    if len(inflection_points) > 1:
+        raise ValueError("Multiple inflection points found in the specified range.")
+
+    inflection_pt = inflection_points[0]
+    dataset['inflection_point'] = inflection_pt
+
 if __name__ == "__main__":
     # python
     fig, ax = plt.subplots(5, 1, sharex=True, figsize=(7, 10))
@@ -108,23 +146,46 @@ if __name__ == "__main__":
         intersection_pt = DMA_results_by_freq[freq]['tangent_line_at_min'].intersect(
             DMA_results_by_freq[freq]['tangent_line_at_start'])
 
+
+        tg_from_tangent_lines = intersection_pt.x
+
         ax[i].axvline(
             x=intersection_pt.x,
             color='red',
             linestyle=':'
         )
 
-        x = intersection_pt.x
-        label = f"Tg = {x:.2f}"  # format as desired
+        label = f"Tg (intersection) = {tg_from_tangent_lines:.2f} °C"  # format as desired
 
         ax[i].annotate(
             label,
-            xy=(x, 1.0),
+            xy=(tg_from_tangent_lines, 1.0),
             xycoords=('data', 'axes fraction'),
             # x in data coords, y as fraction of the axes height
             xytext=(0, 6),  # nudge label a few points above the top
             textcoords='offset points',
-            ha='center',
+            ha='right',
+            va='bottom',
+            color='red',
+            fontsize='small',
+            bbox=dict(boxstyle='round,pad=0.2', fc='white', ec='none', alpha=0.8)
+        )
+
+        tg_from_inflection_point = DMA_results_by_freq[freq]['inflection_point']
+        ax[i].axvline(
+            x=tg_from_inflection_point,
+            color='red',
+            linestyle=':'
+        )
+        label = f"Tg (inflection) = {tg_from_inflection_point:.2f} °C"
+
+        ax[i].annotate(
+            label,
+            xy=(tg_from_inflection_point, 1.0),
+            xycoords=('data', 'axes fraction'),
+            xytext=(0, 6),
+            textcoords='offset points',
+            ha='left',
             va='bottom',
             color='red',
             fontsize='small',
@@ -133,7 +194,7 @@ if __name__ == "__main__":
 
     # Figure-level labels and title
     fig.suptitle(
-        "Derivative of log Storage Modulus vs Temperature at Different Frequencies")
+        "Tg determined from Tangent Line Intersection and Inflection Point Methods",)
     fig.supxlabel('Temperature (°C)')
     fig.supylabel("dlogE'/dT (1/°C)")
 
